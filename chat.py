@@ -11,10 +11,10 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
 CONTEXT_TO_INCLUE = 3
 INSTRUCTIONS = (
-    "Answer my QUERY with the CONTEXT below, but keep it VERY brief. Also, do "
-    "not just paste in text in the format provided to you. And make sure your "
-    "responses are complete sentences in conversatinoal English - DO NOT just "
-    "paste facts."
+    "Answer my QUERY with the CONTEXT below, but keep these rules in mind: "
+    "(1) keep your responses very brief; and (2) do not just paste in text in "
+    "the format provided to you; instead, make sure your responses are "
+    "complete sentences in conversational English."
 )
 
 
