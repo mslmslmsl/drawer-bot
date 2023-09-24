@@ -14,9 +14,9 @@ def create_file(names, texts, embeddings, filename):
     """Creates the JSON file with the embeddings"""
     if os.path.exists(filename):
         os.remove(filename)  # Delete the file if it exists
-    
+
     json_objects = []
-    
+
     for i, j in enumerate(texts):
         print(f"Adding {names[i]} to file")
         json_entry = {

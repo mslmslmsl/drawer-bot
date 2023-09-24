@@ -11,6 +11,7 @@ EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
 CONTEXT_TO_INCLUE = 3
 
+
 def get_data(filename):
     """Loads the JSON that includes artist info and embeddings"""
     with open(filename, "r", encoding="utf-8") as file:
