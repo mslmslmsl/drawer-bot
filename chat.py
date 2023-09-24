@@ -24,40 +24,48 @@ def get_data(filename):
         return json.load(file)
 
 
-data = get_data("data.json")
+def main():
+    """Run the bot"""
+    data = get_data("data.json")
 
-data_embeddings = []
-for entry in data:
-    data_embeddings.append(entry["embeddings"])
+    data_embeddings = []
+    for entry in data:
+        data_embeddings.append(entry["embeddings"])
 
-messages = []
-messages.append({"role": "system", "content": "You are an art advisor."})
-print("Hi I'm an art advisor how can I help you?")
+    messages = []
+    messages.append({"role": "system", "content": "You are an art advisor."})
+    print("Hi I'm an art advisor how can I help you?")
 
-while True:
-    prompt = input("> ")
-    full_prompt = f"{INSTRUCTIONS} QUERY: {prompt}\n\nCONTEXT:"
+    while True:
+        prompt = input("> ")
+        full_prompt = f"{INSTRUCTIONS} QUERY: {prompt}\n\nCONTEXT:"
 
-    prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
-    distances = distances_from_embeddings(prompt_embedding, data_embeddings)
-    indices_of_nearest_neighbors = indices_of_nearest_neighbors_from_distances(
-        distances
-    )
+        prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
+        distances = (
+            distances_from_embeddings(prompt_embedding, data_embeddings)
+        )
+        indices_of_nearest_neighbors = (
+            indices_of_nearest_neighbors_from_distances(distances)
+        )
 
-    for i in indices_of_nearest_neighbors:
-        if indices_of_nearest_neighbors[i] < CONTEXT_TO_INCLUE:
-            full_prompt += data[i]["text"]
+        for i in indices_of_nearest_neighbors:
+            if indices_of_nearest_neighbors[i] < CONTEXT_TO_INCLUE:
+                full_prompt += data[i]["text"]
 
-    messages.append({"role": "user", "content": full_prompt})
-    response = openai.ChatCompletion.create(
-        model=GPT_MODEL, messages=messages, max_tokens=256
-    )
+        messages.append({"role": "user", "content": full_prompt})
+        response = openai.ChatCompletion.create(
+            model=GPT_MODEL, messages=messages, max_tokens=256
+        )
 
-    messages.append(
-        {
-            "role": "assistant",
-            "content": response["choices"][0]["message"]["content"]
-        }
-    )
+        messages.append(
+            {
+                "role": "assistant",
+                "content": response["choices"][0]["message"]["content"]
+            }
+        )
 
-    print(response["choices"][0]["message"]["content"])
+        print(response["choices"][0]["message"]["content"])
+
+
+if __name__ == "__main__":
+    main()

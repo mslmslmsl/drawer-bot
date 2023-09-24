@@ -29,7 +29,7 @@ def create_file(names, texts, embeddings, filename):
         json.dump(json_objects, outfile)
 
 
-def get_info(url: str) -> tuple[str, str, list]:
+def get_info(url: str, driver) -> tuple[str, str, list]:
     """Return artist info from Drawer and related embeddings"""
     driver.get(url)
     driver.implicitly_wait(100)
@@ -65,32 +65,40 @@ def get_artist_urls(url: str, page_id: str) -> list[str]:
     return artist_links
 
 
-print("Starting")
-json_texts = []
-json_embeddings = []
-json_names = []
-FILENAME = "data.json"
+def main():
+    """Create a JSON file with all artist info and embeddings for the bot"""
+    print("Starting")
+    json_texts = []
+    json_embeddings = []
+    json_names = []
+    filename = "data.json"
 
-CHROME_DRIVER_PATH = '/Users/michaellyons/Desktop/Code/OAI/myenv/chromedriver'
-webdriver.chrome.driver = CHROME_DRIVER_PATH
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument('--headless')
+    chrome_driver_path = (
+        '/Users/michaellyons/Desktop/Code/OAI/myenv/chromedriver'
+    )
+    webdriver.chrome.driver = chrome_driver_path
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
 
-# Create the WebDriver with the specified options.
-with webdriver.Chrome(options=chrome_options) as driver:
+    # Create the WebDriver with the specified options.
+    with webdriver.Chrome(options=chrome_options) as driver:
 
-    print("Getting URLs")
-    links = get_artist_urls(URL, "artists_list")
-    print("Got all URLs")
+        print("Getting URLs")
+        links = get_artist_urls(URL, "artists_list")
+        print("Got all URLs")
 
-    for link in links[:2]:
-        x, y, z = get_info(link)
-        print(f"Got info for {x}")
-        json_names.append(x)
-        json_texts.append(y)
-        json_embeddings.append(z)
+        for link in links[:2]:
+            name, bio, embedding = get_info(link, driver)
+            print(f"Got info for {name}")
+            json_names.append(name)
+            json_texts.append(bio)
+            json_embeddings.append(embedding)
 
-    print("Creating JSON file")
-    create_file(json_names, json_texts, json_embeddings, FILENAME)
+        print("Creating JSON file")
+        create_file(json_names, json_texts, json_embeddings, filename)
 
-print("All done!")
+    print("All done!")
+
+
+if __name__ == "__main__":
+    main()
