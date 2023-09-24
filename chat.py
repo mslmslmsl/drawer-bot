@@ -10,6 +10,12 @@ from openai.embeddings_utils import (
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
 CONTEXT_TO_INCLUE = 3
+INSTRUCTIONS = (
+    "Answer my QUERY with the CONTEXT below, but keep it VERY brief. Also, do "
+    "not just paste in text in the format provided to you. And make sure your "
+    "responses are complete sentences in conversatinoal English - DO NOT just "
+    "paste facts."
+)
 
 
 def get_data(filename):
@@ -30,12 +36,7 @@ print("Hi I'm an art advisor how can I help you?")
 
 while True:
     prompt = input("> ")
-    full_prompt = (
-        "Answer my QUERY with the CONTEXT below, but keep it VERY brief. "
-        "Also, do not just paste in text in the format provided to you. And "
-        "make sure your responses are complete sentences in conversatinoal "
-        f"English - DO NOT just paste facts. QUERY: {prompt}\n\nCONTEXT:"
-    )
+    full_prompt = f"{INSTRUCTIONS} QUERY: {prompt}\n\nCONTEXT:"
 
     prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
     distances = distances_from_embeddings(prompt_embedding, data_embeddings)
