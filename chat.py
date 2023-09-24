@@ -37,7 +37,12 @@ def main():
     print("Hi I'm an art advisor how can I help you?")
 
     while True:
+
         prompt = input("> ")
+        if prompt.lower() == "exit":
+            print("Bye bye")
+            break
+
         full_prompt = f"{INSTRUCTIONS} QUERY: {prompt}\n\nCONTEXT:"
 
         prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
