@@ -27,11 +27,10 @@ def create_file(names, texts, embeddings, filename):
 
     with open(filename, "w", encoding="utf-8") as outfile:
         json.dump(json_objects, outfile)
-        # outfile.write("\n")
 
 
 def get_info(url: str) -> tuple[str, str, list]:
-    """Retrun artist info from Drawer and related embeddings"""
+    """Return artist info from Drawer and related embeddings"""
     driver.get(url)
     driver.implicitly_wait(100)
 
