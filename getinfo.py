@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 URL = "https://drawer.nyc/artists/"
 EMBEDDING_MODEL = 'text-embedding-ada-002'
+TESTING = True
 
 
 def create_file(names, texts, embeddings, filename):
@@ -87,7 +88,7 @@ def main():
         links = get_artist_urls(URL, "artists_list")
         print("Got all URLs")
 
-        for link in links[:2]:
+        for link in links[:2] if TESTING else links:
             name, bio, embedding = get_info(link, driver)
             print(f"Got info for {name}")
             json_names.append(name)
