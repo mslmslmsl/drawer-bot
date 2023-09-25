@@ -39,7 +39,7 @@ def get_info(url: str, driver) -> tuple[str, str, list]:
     artist_name = modified_text.split("\n")[0]
     rest_of_text = modified_text.split("\n")[1:]
     final_name = f"ARTIST NAME: {artist_name}"
-    final_bio = "ARTIST BIO AND WORKS: " + "\n".join(rest_of_text)
+    final_bio = f"ARTIST BIO AND WORKS: {'\n'.join(rest_of_text)}"
     final_text = f"{final_name}\n{final_bio}"
 
     embedding = get_embedding(final_text, engine=EMBEDDING_MODEL)
