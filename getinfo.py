@@ -2,6 +2,7 @@
 import json
 import os
 import requests
+import hashlib
 from selenium import webdriver
 from openai.embeddings_utils import get_embedding
 from bs4 import BeautifulSoup
@@ -10,17 +11,33 @@ URL = "https://drawer.nyc/artists/"
 EMBEDDING_MODEL = "text-embedding-ada-002"
 TESTING = True
 
+text = "This is some text."
+
+# Create an MD5 hash object.
+md5_hash = hashlib.md5()
+
+# Update the hash object with the text.
+md5_hash.update(text.encode())
+
+# Get the hash value from the hash object.
+md5_digest = md5_hash.hexdigest()
+
+# Print the hash value.
+# print(md5_digest)
+
+
+# exit()
+
 
 def create_file(names, texts, embeddings, filename):
-    """Creates the JSON file with the embeddings"""
-    if os.path.exists(filename):
-        os.remove(filename)
+    """Creates a new JSON file with the text and embeddings"""
 
-    json_objects = []
-
-    for i, j in enumerate(texts):
-        print(f"Adding {names[i]} to file")
-        json_objects.append({"text": j, "embeddings": embeddings[i]})
+    json_objects = [{
+        "name": names[i],
+        "text": j,
+        "embedding": embeddings[i],
+        "hash": calculate_md5_hash(j)
+    } for i, j in enumerate(texts)]
 
     with open(filename, "w", encoding="utf-8") as outfile:
         json.dump(json_objects, outfile)
@@ -55,21 +72,26 @@ def get_artist_urls(url: str, page_id: str) -> list[str]:
     soup = BeautifulSoup(response.content, "html.parser")
 
     element = soup.find(id=page_id)
-    artist_links = []
-    for artist_link in element.find_all("a"):
-        href = artist_link.get("href")
-        if href:
-            artist_links.append("https://drawer.nyc" + href)
+
+    artist_links = [
+        "https://drawer.nyc" + artist_link.get("href")
+        for artist_link in element.find_all("a")
+        if artist_link.get("href")
+    ]
 
     return artist_links
+
+
+def calculate_md5_hash(text: str):
+    md5_hash = hashlib.md5()
+    md5_hash.update(text.encode('utf-8'))
+    return md5_hash.hexdigest()
 
 
 def main():
     """Create a JSON file with all artist info and embeddings for the bot"""
     print("Starting")
-    json_texts = []
-    json_embeddings = []
-    json_names = []
+    json_texts, json_embeddings, json_names = [], [], []
     filename = "data.json"
 
     chrome_driver_path = (
@@ -84,7 +106,9 @@ def main():
         links = get_artist_urls(URL, "artists_list")
         print("Got all URLs")
 
-        for link in links[:2] if TESTING else links:
+        iteration_range = links[:2] if TESTING else links
+
+        for link in iteration_range:
             name, bio, embedding = get_info(link, driver)
             print(f"Got info for {name}")
             json_names.append(name)
@@ -92,6 +116,7 @@ def main():
             json_embeddings.append(embedding)
 
         print("Creating JSON file")
+
         create_file(json_names, json_texts, json_embeddings, filename)
 
     print("All done!")

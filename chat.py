@@ -30,7 +30,7 @@ def main():
 
     data_embeddings = []
     for entry in data:
-        data_embeddings.append(entry["embeddings"])
+        data_embeddings.append(entry["embedding"])
 
     messages = []
     messages.append({"role": "system", "content": "You are an art advisor."})
