@@ -1,8 +1,7 @@
 """Creates JSON file to use in chatbot"""
 import json
-import os
-import requests
 import hashlib
+import requests
 from selenium import webdriver
 from openai.embeddings_utils import get_embedding
 from bs4 import BeautifulSoup
@@ -10,23 +9,6 @@ from bs4 import BeautifulSoup
 URL = "https://drawer.nyc/artists/"
 EMBEDDING_MODEL = "text-embedding-ada-002"
 TESTING = True
-
-text = "This is some text."
-
-# Create an MD5 hash object.
-md5_hash = hashlib.md5()
-
-# Update the hash object with the text.
-md5_hash.update(text.encode())
-
-# Get the hash value from the hash object.
-md5_digest = md5_hash.hexdigest()
-
-# Print the hash value.
-# print(md5_digest)
-
-
-# exit()
 
 
 def create_file(names, texts, embeddings, filename):
@@ -83,6 +65,7 @@ def get_artist_urls(url: str, page_id: str) -> list[str]:
 
 
 def calculate_md5_hash(text: str):
+    """Get text hash"""
     md5_hash = hashlib.md5()
     md5_hash.update(text.encode('utf-8'))
     return md5_hash.hexdigest()
