@@ -1,11 +1,6 @@
 """Chatbot that uses Drawer artists page as context"""
 import json
 import openai
-from openai.embeddings_utils import (
-    get_embedding,
-    distances_from_embeddings,
-    indices_of_nearest_neighbors_from_distances,
-)
 
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
@@ -44,10 +39,18 @@ def main():
 
         full_prompt = f"{INSTRUCTIONS} QUERY: {prompt}\n\nCONTEXT:"
 
-        prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
-        distances = distances_from_embeddings(prompt_embedding, data_embeddings)
+        prompt_embedding = openai.embeddings_utils.get_embedding(
+            prompt,
+            engine=EMBEDDING_MODEL
+        )
+        distances = openai.embeddings_utils.distances_from_embeddings(
+            prompt_embedding,
+            data_embeddings
+        )
         indices_of_nearest_neighbors = (
-            indices_of_nearest_neighbors_from_distances(distances)
+            openai.embeddings_utils.indices_of_nearest_neighbors_from_distances(
+                distances
+            )
         )
 
         for i in indices_of_nearest_neighbors:
