@@ -37,7 +37,6 @@ def main():
     print("Hi I'm an art advisor how can I help you?")
 
     while True:
-
         prompt = input("> ")
         if prompt.lower() == "exit":
             print("Bye bye")
@@ -46,9 +45,7 @@ def main():
         full_prompt = f"{INSTRUCTIONS} QUERY: {prompt}\n\nCONTEXT:"
 
         prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
-        distances = (
-            distances_from_embeddings(prompt_embedding, data_embeddings)
-        )
+        distances = distances_from_embeddings(prompt_embedding, data_embeddings)
         indices_of_nearest_neighbors = (
             indices_of_nearest_neighbors_from_distances(distances)
         )
@@ -65,7 +62,7 @@ def main():
         messages.append(
             {
                 "role": "assistant",
-                "content": response["choices"][0]["message"]["content"]
+                "content": response["choices"][0]["message"]["content"],
             }
         )
 
