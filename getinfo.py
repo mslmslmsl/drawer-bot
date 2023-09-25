@@ -34,17 +34,19 @@ def get_info(url: str, driver) -> tuple[str, str, list]:
     page_text = driver.find_element("tag name", "html").text
     start_index = page_text.find("Cart")
     end_index = page_text.find("Get notified when new works")
-    modified_text = page_text[start_index + 5 : end_index - 1]
+    abridged_text = page_text[start_index + 5 : end_index - 1]
+    lines = abridged_text.split("\n")
 
-    artist_name = modified_text.split("\n")[0]
-    rest_of_text = modified_text.split("\n")[1:]
-    final_name = f"ARTIST NAME: {artist_name}"
-    final_bio = f"ARTIST BIO AND WORKS: {'\n'.join(rest_of_text)}"
-    final_text = f"{final_name}\n{final_bio}"
+    artist_name = lines[0]
+    artist_bio = '\n'.join(lines[1:])
 
-    embedding = get_embedding(final_text, engine=EMBEDDING_MODEL)
+    artist_name_and_bio = (
+        f"ARTIST NAME: {artist_name}\n"
+        f"ARTIST BIO AND WORKS: {artist_bio}"
+    )
+    embedding = get_embedding(artist_name_and_bio, engine=EMBEDDING_MODEL)
 
-    return artist_name, final_text, embedding
+    return artist_name, artist_name_and_bio, embedding
 
 
 def get_artist_urls(url: str, page_id: str) -> list[str]:
