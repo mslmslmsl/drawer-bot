@@ -1,6 +1,6 @@
 # Chatbot for Art Advice
 
-This chatbot provides a conversational interface for learning about [Drawer]() artists and includes two main components:
+This chatbot provides a conversational interface for learning about [Drawer](https://drawer.nyc/) artists and includes two main components:
 
 1. **getinfo.py**: Use this script to fetch artist info (name, bio, works) from the Drawer [Artists page](https://drawer.nyc/artists/) and store the data in `data.json`. Before using this script, make sure to install the required dependencies (incl., `webdriver`) and update the webdriver path.
 
