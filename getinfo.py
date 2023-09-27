@@ -38,10 +38,11 @@ def get_info(url: str, driver) -> tuple[str, str, list]:
 
     artist_name = lines[0]
     artist_bio = '\n'.join(lines[1:])
+    artist_bio = artist_bio.replace("\n\nSold","\nThe work above is sold")
 
     artist_name_and_bio = (
         f"ARTIST NAME: {artist_name}\n"
-        f"ARTIST BIO AND WORKS: {artist_bio}"
+        f"ARTIST BIO AND WORKS: {artist_bio}\n\n"
     )
     embedding = get_embedding(artist_name_and_bio, engine=EMBEDDING_MODEL)
 
