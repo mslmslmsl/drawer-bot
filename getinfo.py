@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 URL = "https://drawer.nyc/artists/"
 EMBEDDING_MODEL = "text-embedding-ada-002"
+CHROME_DRIVER_PATH = "/Users/michaellyons/Desktop/Code/OAI/myenv/chromedriver"
 TESTING = True
 
 
@@ -56,13 +57,11 @@ def get_artist_urls(url: str, page_id: str) -> list[str]:
 
     element = soup.find(id=page_id)
 
-    artist_links = [
+    return [
         "https://drawer.nyc" + artist_link.get("href")
         for artist_link in element.find_all("a")
         if artist_link.get("href")
     ]
-
-    return artist_links
 
 
 def calculate_md5_hash(text: str):
@@ -78,10 +77,7 @@ def main():
     json_texts, json_embeddings, json_names = [], [], []
     filename = "data.json"
 
-    chrome_driver_path = (
-        "/Users/michaellyons/Desktop/Code/OAI/myenv/chromedriver"
-    )
-    webdriver.chrome.driver = chrome_driver_path
+    webdriver.chrome.driver = CHROME_DRIVER_PATH
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
 

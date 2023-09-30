@@ -12,16 +12,17 @@ from openai.embeddings_utils import (
 # constants
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
-CONTEXT_TO_INCLUE = 3
-INSTRUCTIONS = (
-    "Answer my QUERY with the history above in mind and, if relevant, the "
-    "CONTEXT below. Note that if you see the text 'The work above is sold,' "
-    "that means that the lines above identify an artwork that has sold. Also "
-    "keep these rules in mind: (1) keep your responses very brief; (2) do not "
-    "just paste in text in the format provided to you and don't say things "
-    "like 'based on the info provided'; and (3) make sure your responses are "
-    "complete sentences in conversational English."
-)
+CONTEXT_TO_INCLUDE = 3  # how many artist profiles to add to each prompt
+INSTRUCTIONS = """
+    Answer my QUERY with the history above in mind.
+    If relevant, also base your response on the CONTEXT below.
+    The text 'The work above is sold' means that the lines above identify an
+    artwork that has sold.
+    Keep your responses very brief.
+    Do not just paste in text in the format provided to you.
+    Don't say things like 'based on the info provided.'
+    Make sure your responses are complete sentences in conversational English.
+    """
 PERSONALITY = random.choice([
     "You are an arrogant, elitist art advisor",
     "You are a friendly, helpful art advisor",
@@ -33,7 +34,7 @@ ENCODING = tiktoken.encoding_for_model(GPT_MODEL)
 
 def count_tokens(prompt):
     """Return token count for entire JSON"""
-    token_count = len(prompt) * 13 + 2  # for { } ' , : [ ]
+    token_count = len(prompt) * 14 + 2  # for [{ '':'', '':'' }, ... ]
     for entry in prompt:
         for key, value in entry.items():
             token_count += len(ENCODING.encode(key))
@@ -88,8 +89,8 @@ def main():
 
         # create full prompt with instructions, prompt, and context
         full_prompt = f"{INSTRUCTIONS} \n\nCONTEXT:"
-        for i in indices_of_nearest_neighbors:
-            if indices_of_nearest_neighbors[i] < CONTEXT_TO_INCLUE:
+        for i, neighbor_index in enumerate(indices_of_nearest_neighbors):
+            if neighbor_index < CONTEXT_TO_INCLUDE:
                 full_prompt += data[i]["text"]
         full_prompt += f"\n\nQUERY: {prompt}"
 
@@ -102,18 +103,20 @@ def main():
             model=GPT_MODEL, messages=messages, max_tokens=256
         )
 
+        # print the response
+        print(response["choices"][0]["message"]["content"])
+
         # remove context and instructions from the list to save on tokens
         messages.pop()
         messages.append({"role": "user", "content": prompt})
+
+        # add the response to our history
         messages.append(
             {
                 "role": "assistant",
                 "content": response["choices"][0]["message"]["content"],
             }
         )
-
-        # print the response
-        print(response["choices"][0]["message"]["content"])
 
 
 if __name__ == "__main__":
