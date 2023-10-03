@@ -1,6 +1,7 @@
 """Chatbot that uses Drawer artists page as context"""
 import json
 import random
+import argparse
 import openai
 import tiktoken
 from openai.embeddings_utils import (
@@ -12,7 +13,7 @@ from openai.embeddings_utils import (
 # constants
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
-CONTEXT_TO_INCLUDE = 3  # how many artist profiles to add to each prompt
+DEFAULT_CONTEXT = 3  # deafult number of artist profiles to add to each prompt
 INSTRUCTIONS = """
     Answer my QUERY with the history above in mind.
     If relevant, also base your response on the CONTEXT below.
@@ -30,6 +31,24 @@ PERSONALITY = random.choice([
 ])
 MAX_LENGTH = 4096
 ENCODING = tiktoken.encoding_for_model(GPT_MODEL)
+
+# Let users specify the number of profiles to include as context (default=3)
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--context",
+    type=int,
+    default=DEFAULT_CONTEXT,
+    help=(
+        "Specify number of artist profiles to include in "
+        "prompts (default: %(default)s)"
+    )
+)
+args = parser.parse_args()
+
+if args.context and (0 <= int(args.context) <= 20):
+    context_to_include = int(args.context)
+else:
+    raise ValueError("The context must be an integer between 0 and 20.")
 
 
 def count_tokens(prompt):
@@ -82,7 +101,10 @@ def main():
 
         # get prompt embedding and context negihbors
         prompt_embedding = get_embedding(prompt, engine=EMBEDDING_MODEL)
-        distances = distances_from_embeddings(prompt_embedding, data_embeddings)
+        distances = distances_from_embeddings(
+            prompt_embedding,
+            data_embeddings
+        )
         indices_of_nearest_neighbors = (
             indices_of_nearest_neighbors_from_distances(distances)
         )
@@ -90,7 +112,7 @@ def main():
         # create full prompt with instructions, prompt, and context
         full_prompt = f"{INSTRUCTIONS} \n\nCONTEXT:"
         for i, neighbor_index in enumerate(indices_of_nearest_neighbors):
-            if neighbor_index < CONTEXT_TO_INCLUDE:
+            if neighbor_index < context_to_include:
                 full_prompt += data[i]["text"]
         full_prompt += f"\n\nQUERY: {prompt}"
 
