@@ -13,7 +13,7 @@ from openai.embeddings_utils import (
 # constants
 EMBEDDING_MODEL = "text-embedding-ada-002"
 GPT_MODEL = "gpt-3.5-turbo"
-DEFAULT_CONTEXT = 3  # deafult number of artist profiles to add to each prompt
+DEFAULT_CONTEXT = 3  # default number of artist profiles to add to each prompt
 INSTRUCTIONS = """
     Answer my QUERY with the history above in mind.
     If relevant, also base your response on the CONTEXT below.
@@ -29,7 +29,7 @@ PERSONALITY = random.choice([
     "You are a friendly, helpful art advisor",
     "You are a cynical, bored art advisor"
 ])
-MAX_LENGTH = 4096
+MAX_LENGTH = 4097
 ENCODING = tiktoken.encoding_for_model(GPT_MODEL)
 
 # Let users specify the number of profiles to include as context (default=3)
@@ -51,19 +51,9 @@ else:
     raise ValueError("The context must be an integer between 0 and 20.")
 
 
-def count_tokens(prompt):
-    """Return token count for entire JSON"""
-    token_count = len(prompt) * 14 + 2  # for [{ '':'', '':'' }, ... ]
-    for entry in prompt:
-        for key, value in entry.items():
-            token_count += len(ENCODING.encode(key))
-            token_count += len(ENCODING.encode(value))
-    return token_count
-
-
 def measure_and_truncate_prompt(prompt):
     """Calculate token length and remove second object (keep `system`)"""
-    while count_tokens(prompt) >= MAX_LENGTH:
+    while count_tokens(prompt) > MAX_LENGTH:
         del prompt[1]  # delete the oldest message other than the system one
     return prompt
 
@@ -72,6 +62,47 @@ def get_data(filename):
     """Loads the JSON that includes artist info and embeddings"""
     with open(filename, "r", encoding="utf-8") as file:
         return json.load(file)
+
+
+def count_tokens(messages, model=GPT_MODEL):
+    """Return the number of tokens used by a list of messages."""
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+    except KeyError:
+        print("Warning: model not found. Using cl100k_base encoding.")
+        encoding = tiktoken.get_encoding("cl100k_base")
+    if model in {
+        "gpt-3.5-turbo-0613",
+        "gpt-3.5-turbo-16k-0613",
+        "gpt-4-0314",
+        "gpt-4-32k-0314",
+        "gpt-4-0613",
+        "gpt-4-32k-0613",
+    }:
+        tokens_per_message = 3
+        tokens_per_name = 1
+    elif model == "gpt-3.5-turbo-0301":
+        tokens_per_message = 4  # every message follows
+        # <|start|>{role/name}\n{content}<|end|>\n
+        tokens_per_name = -1  # if there's a name, the role is omitted
+    elif "gpt-3.5-turbo" in model:
+        return count_tokens(messages, model="gpt-3.5-turbo-0613")
+    elif "gpt-4" in model:
+        return count_tokens(messages, model="gpt-4-0613")
+    else:
+        raise NotImplementedError(
+            f"count_tokens() is not implemented for model {model}."
+        )
+
+    num_tokens = 0
+    for message in messages:
+        num_tokens += tokens_per_message
+        for key, value in message.items():
+            num_tokens += len(encoding.encode(value))
+            if key == "name":
+                num_tokens += tokens_per_name
+    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+    return num_tokens
 
 
 def main():
